@@ -1,3 +1,4 @@
+#TODO: Switch to simple helm chart
 ---
 apiVersion: v1
 kind: Namespace
