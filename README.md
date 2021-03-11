@@ -1,0 +1,2 @@
+# imgCloneCtrl
+Image clone controller
