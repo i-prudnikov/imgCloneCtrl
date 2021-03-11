@@ -13,6 +13,13 @@ __The solution:__
 
 [![asciicast](https://asciinema.org/a/poCTy7fPMsvHAT5lOATaMALtU.svg)](https://asciinema.org/a/poCTy7fPMsvHAT5lOATaMALtU)
 ---
+#### IMPORTANT! Image transformation & backup registry
+Before start using this controller, keep in mind the following approach taken for image transformation:
+1. Since backup registry can be of choice, we assume that nested registries are not supported, i.e. 
+backup image is flattened to have only name and tag.
+2. By default, when image is pushed to backup repository, corresponding registry will be added automatically, however, that registry will be private by default. So you need to prepare appropriate image pull secret upfront. Otherwise you crash all your deployments and daemonsets. This is not optimal.
+Thus, the controller built in a way that the target registry in the backup repository must be created upfront, with its visibility set to "public". And the images names itransformed to refer to it.
+---
 
 Usage instructions:
 1. How to build:
@@ -38,7 +45,7 @@ __Note:__ Container is using `tini` supervisor.
           args: [
               "imgCloneCtrl",
               "--ignoreNamespace=test2",
-              "--backupRegistry=backup.registry/store", #UPDATE THIS
+              "--backupRegistry=backup.repository/namespace/registry", #UPDATE THIS 
               "--backupRegistryUser=<YOUR_REGISTRY_USER>", #UPDATE THIS
               "--backupRegistryPassword=<YOUR_REGISTRY_PASSWORD>", #UPDATE THIS
               "--leaderElectionID=image-clone-controller-leader",
@@ -59,7 +66,8 @@ Cli interface is self-explanatory:
 imgCloneCtrl -h 
 Usage of ./build/imgCloneCtrl:
   -backupRegistry string
-        Backup registry to use (i.e. quay.io/my_favorite_registry)
+        Backup registry to use (i.e. quay.io/namespace/registry) NOTE! Here should be passed a repository, namespace and a registry.
+        The registry is recommended to have puplic visibility.
   -backupRegistryPassword string
         Backup registry password
   -backupRegistryUser string
