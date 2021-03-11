@@ -1,0 +1,6 @@
+build/
+bin/
+deploy/deploy_real.yaml
+*.tar
+*.tar.gz
+codegen/github.com

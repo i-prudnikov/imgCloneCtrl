@@ -1,0 +1,176 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "test-ki"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "image-clone-controller-sa"
+  namespace: "test-ki"
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: "image-clone-controller-role"
+  namespace: "test-ki"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    resourceNames:
+      # Defaults to "<election-id>"
+      - "image-clone-controller-leader"
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - update
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: "image-clone-controller-role-binding"
+  namespace: "test-ki"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "image-clone-controller-role"
+subjects:
+  - kind: ServiceAccount
+    name: "image-clone-controller-sa"
+    namespace: "test-ki"
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: "image-clone-controller-clusterrole"
+rules:
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+    verbs:
+      - list
+      - watch
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: "image-clone-controller-clusterrole-binding"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "image-clone-controller-clusterrole"
+subjects:
+  - kind: ServiceAccount
+    name: image-clone-controller-sa
+    namespace: test-ki
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "image-clone-controller"
+  namespace: "test-ki"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "image-clone-controller"
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "image-clone-controller"
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app.kubernetes.io/name"
+                    operator: In
+                    values:
+                      - "image-clone-controller"
+              topologyKey: "kubernetes.io/hostname"
+      serviceAccountName: "image-clone-controller-sa"
+      containers:
+        - name: controller
+          args: [
+              "imgCloneCtrl",
+              "--ignoreNamespace=test2",
+              "--backupRegistry=backup.registry/store", #UPDATE THIS
+              "--backupRegistryUser=<YOUR_REGISTRY_USER>", #UPDATE THIS
+              "--backupRegistryPassword=<YOUR_REGISTRY_PASSWORD>", #UPDATE THIS
+              "--leaderElectionID=image-clone-controller-leader",
+              "--leaderElectionNamespace=test-ki"]
+          image: "some.registry/image-clone-controller:0.0.1" #UPDATE THIS
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: 0.5Gi
+            requests:
+              cpu: "0.01"
+              memory: 0.1Gi
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /metrics
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+# TODO: Update controller to provide readiness endpoints
+#          readinessProbe:
+#            failureThreshold: 3
+#            httpGet:
+#              path: /healthz
+#              port: 10254
+#              scheme: HTTP
+#            periodSeconds: 10
+#            successThreshold: 1
+#            timeoutSeconds: 10
