@@ -52,7 +52,8 @@ To deploy, you need to run the following command:
 kubectl apply -f ./deploy/deploy.yaml
 ```
 
-3. Controller cli 
+3. Controller cli
+
 Cli interface is self-explanatory:
 ```bash
 imgCloneCtrl -h 
