@@ -1,6 +1,7 @@
 # Image clone controller
 
-##TL;DR
+### TL;DR
+
 __The problem:__
 We have a Kubernetes cluster on which we can run applications. These applications will often use publicly available container images, like official images of popular programs, e.g. Jenkins, PostgreSQL, and so on. Since the images reside in repositories over which we have no control, it is possible that the owner of the repo deletes the image while our pods are configured to use it.
 In the case of a subsequent node rotation, the locally cached copies of the images would be deleted and Kubernetes would be unable to re-download them in order to re-provision the applications.
@@ -29,7 +30,8 @@ __Note:__ Container is using `tini` supervisor.
 - All manifests are in single file: `./deploy/deploy.yaml`
 - Before deployment:
   * you need to update the deployment to use the image of controller from appropriate registry (see p. 1)
-  * you need to set the name and credentials of your backup registry `Deployment->spec->template->spec->containers[]->args`    
+  * you need to set the name and credentials of your backup registry
+    `Deployment->spec->template->spec->containers[]->args`    
 ```yaml
      containers:
         - name: controller
