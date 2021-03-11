@@ -264,12 +264,14 @@ func (r *reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	lg := log.FromContext(ctx)
 
 	//TODO: remove
+	/*
 	if request.Namespace != "test" {
 		return reconcile.Result{}, nil
 	}
 	if request.Name != "Deployment:server" && request.Name != "DaemonSet:server" {
 		return reconcile.Result{}, nil
 	}
+	*/
 
 	//This returns managed object based on kind
 	obj, err = r.fetchObjectFromRequest(ctx, request)

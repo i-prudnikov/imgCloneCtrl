@@ -44,7 +44,8 @@ __Note:__ Container is using `tini` supervisor.
         - name: controller
           args: [
               "imgCloneCtrl",
-              "--ignoreNamespace=test2",
+              "--ignoreNamespace=<NAMESPACE1>", #UPDATE THIS
+              "--ignoreNamespace=<NAMESPACE2>", #UPDATE THIS
               "--backupRegistry=backup.repository/namespace/registry", #UPDATE THIS 
               "--backupRegistryUser=<YOUR_REGISTRY_USER>", #UPDATE THIS
               "--backupRegistryPassword=<YOUR_REGISTRY_PASSWORD>", #UPDATE THIS
@@ -73,7 +74,7 @@ Usage of ./build/imgCloneCtrl:
   -backupRegistryUser string
         Backup registry user
   -ignoreNamespace value
-        Name of namespace to ignore. Multiple values supported. (default kube-system)
+        Name of namespace to ignore. Multiple values supported. ('kube-system' is always ignored!)
   -kubeconfig string
         Paths to a kubeconfig. Only required if out-of-cluster.
   -leaderElectionID string

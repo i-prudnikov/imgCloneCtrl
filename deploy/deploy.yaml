@@ -136,8 +136,9 @@ spec:
         - name: controller
           args: [
               "imgCloneCtrl",
-              "--ignoreNamespace=test2",
-              "--backupRegistry=backup.registry/store", #UPDATE THIS
+              "--ignoreNamespace=<NAMESPACE1>", #UPDATE THIS
+              "--ignoreNamespace=<NAMESPACE2>", #UPDATE THIS
+              "--backupRegistry=backup.repository/namespace/registry", #UPDATE THIS
               "--backupRegistryUser=<YOUR_REGISTRY_USER>", #UPDATE THIS
               "--backupRegistryPassword=<YOUR_REGISTRY_PASSWORD>", #UPDATE THIS
               "--leaderElectionID=image-clone-controller-leader",
