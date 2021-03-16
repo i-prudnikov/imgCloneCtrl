@@ -270,13 +270,13 @@ func (r *reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 	if request.Name != "Deployment:server" && request.Name != "DaemonSet:server" {
 		return reconcile.Result{}, nil
-	}
-	*/
+	}*/
 
 	//This returns managed object based on kind
 	obj, err = r.fetchObjectFromRequest(ctx, request)
 	if err != nil {
-		return reconcile.Result{}, fmt.Errorf("could not fetch object: %+v", err)
+		lg.Error(err,"could not fetch object")
+		return reconcile.Result{}, nil
 	}
 
 	//Update images in the spec, to use images from backup registry
